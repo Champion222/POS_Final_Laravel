@@ -7,8 +7,8 @@
             
             <div class="flex items-center gap-4 w-full md:w-auto">
                 <div class="relative">
-                    <img src="https://ui-avatars.com/api/?name={{ auth()->user()->name }}&background=6366f1&color=fff" 
-                         class="w-12 h-12 rounded-full border-2 border-white shadow-sm" alt="Avatar">
+                    <img src="{{ auth()->user()->image ? asset('storage/'.auth()->user()->image) : 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&background=6366f1&color=fff' }}" 
+                         class="w-12 h-12 rounded-full border-2 border-white shadow-sm object-cover" alt="Avatar">
                     <span class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></span>
                 </div>
                 <div>

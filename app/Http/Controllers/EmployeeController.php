@@ -3,16 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreEmployeeRequest;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\View\View;
 use App\Models\Employee;
 use App\Models\Position;
-use App\Models\User;
 use App\Models\Sale;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\View\View;
 
 class EmployeeController extends Controller
 {
@@ -20,6 +20,7 @@ class EmployeeController extends Controller
     public function index(): View
     {
         $employees = Employee::with('position', 'user')->latest()->get();
+
         return view('employees.index', compact('employees'));
     }
 
@@ -27,6 +28,7 @@ class EmployeeController extends Controller
     public function create(): View
     {
         $positions = Position::all();
+
         return view('employees.create', compact('positions'));
     }
 
@@ -82,13 +84,14 @@ class EmployeeController extends Controller
             DB::commit(); // Save everything
 
             return redirect()->route('employees.index')
-                ->with('success', $userId 
-                    ? "Employee & Login Account created successfully!" 
-                    : "Employee created successfully.");
+                ->with('success', $userId
+                    ? 'Employee & Login Account created successfully!'
+                    : 'Employee created successfully.');
 
         } catch (\Throwable $e) {
             DB::rollBack(); // Undo if error
-            return back()->withInput()->with('error', 'Error creating employee: ' . $e->getMessage());
+
+            return back()->withInput()->with('error', 'Error creating employee: '.$e->getMessage());
         }
     }
 
@@ -123,9 +126,38 @@ class EmployeeController extends Controller
     }
 
     // 5. REPORT EXPORT
-    public function report(Employee $employee): View
+    public function report(Request $request, Employee $employee): View
     {
-        return view('employees.report', compact('employee'));
+        $filter = $request->get('filter', 'all');
+
+        $totalSales = 0;
+        $totalTransactions = 0;
+        $recentSales = collect();
+
+        if ($employee->user_id) {
+            $query = Sale::where('user_id', $employee->user_id);
+
+            if ($filter === 'today') {
+                $query->whereDate('created_at', Carbon::today());
+            } elseif ($filter === 'week') {
+                $query->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+            } elseif ($filter === 'month') {
+                $query->whereMonth('created_at', Carbon::now()->month)
+                    ->whereYear('created_at', Carbon::now()->year);
+            }
+
+            $totalSales = $query->sum('final_total');
+            $totalTransactions = $query->count();
+            $recentSales = $query->latest()->take(10)->get();
+        }
+
+        return view('employees.report', compact(
+            'employee',
+            'filter',
+            'totalSales',
+            'totalTransactions',
+            'recentSales'
+        ));
     }
 
     // 6. DELETE EMPLOYEE
@@ -135,6 +167,7 @@ class EmployeeController extends Controller
             User::destroy($employee->user_id); // Delete linked login
         }
         $employee->delete(); // Delete employee record
+
         return back()->with('success', 'Employee removed successfully.');
     }
 }

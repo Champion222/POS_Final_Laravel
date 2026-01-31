@@ -2,20 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\View\View;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
+use App\Models\Category;
+use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleDetail;
-use App\Models\Category;
-use App\Models\Customer;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\View\View;
 use KHQR\BakongKHQR;
-use KHQR\Models\IndividualInfo;
 use KHQR\Helpers\KHQRData;
+use KHQR\Models\IndividualInfo;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class PosController extends Controller
@@ -25,7 +25,20 @@ class PosController extends Controller
         $products = Product::select('id', 'name', 'sale_price', 'image', 'qty', 'barcode', 'category_id')->where('qty', '>', 0)->get();
         $categories = Category::select('id', 'name')->get();
         $customers = Customer::select('id', 'name')->get();
+
         return view('pos.index', compact('products', 'categories', 'customers'));
+    }
+
+    public function stock(): JsonResponse
+    {
+        $stocks = Product::query()
+            ->select('id', 'qty')
+            ->pluck('qty', 'id');
+
+        return response()->json([
+            'status' => 'success',
+            'stocks' => $stocks,
+        ]);
     }
 
     public function generateKhqr(Request $request): JsonResponse
@@ -50,7 +63,7 @@ class PosController extends Controller
             'status' => 'success',
             'qr_svg' => trim($qrImage),
             'md5' => $khqr->data['md5'],
-            'amount' => number_format($amount, 2)
+            'amount' => number_format($amount, 2),
         ]);
     }
 
@@ -63,10 +76,12 @@ class PosController extends Controller
                 // Real Bakong Check
                 $bakong = new BakongKHQR($token);
                 $result = $bakong->checkTransactionByMD5($request->md5);
+
                 return response()->json($result);
             } else {
                 // Simulation (If you don't have a token yet)
-                $isPaid = rand(0, 10) > 8; 
+                $isPaid = rand(0, 10) > 8;
+
                 return response()->json(['responseCode' => $isPaid ? 0 : 1]);
             }
         } catch (\Exception $e) {
@@ -76,8 +91,8 @@ class PosController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $cart = $request->cart_data; 
-        
+        $cart = $request->cart_data;
+
         DB::beginTransaction();
         try {
             $total = 0;
@@ -88,7 +103,7 @@ class PosController extends Controller
             $sale = Sale::create([
                 'user_id' => Auth::id(),
                 'customer_id' => $request->customer_id,
-                'invoice_number' => 'INV-' . strtoupper(uniqid()),
+                'invoice_number' => 'INV-'.strtoupper(uniqid()),
                 'payment_type' => $request->payment_type,
                 'total_amount' => $total,
                 'final_total' => $total,
@@ -100,30 +115,32 @@ class PosController extends Controller
                     'product_id' => $item['id'],
                     'qty' => $item['qty'],
                     'price' => $item['price'],
-                    'subtotal' => $item['price'] * $item['qty']
+                    'subtotal' => $item['price'] * $item['qty'],
                 ]);
                 Product::where('id', $item['id'])->decrement('qty', $item['qty']);
             }
 
             DB::commit();
             $this->sendTelegramReceiptNotification($sale, $cart);
+
             return response()->json(['status' => 'success']);
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
         }
     }
 
     /**
-     * @param array<int, array{id:int, name:string, price:numeric, qty:int, image?:string|null}> $cart
+     * @param  array<int, array{id:int, name:string, price:numeric, qty:int, image?:string|null}>  $cart
      */
     private function sendTelegramReceiptNotification(Sale $sale, array $cart): void
     {
         $token = config('services.telegram.bot_token');
         $chatId = config('services.telegram.chat_id');
 
-        if (!$token || !$chatId) {
+        if (! $token || ! $chatId) {
             return;
         }
 
@@ -148,7 +165,7 @@ class PosController extends Controller
     }
 
     /**
-     * @param array<int, array{id:int, name:string, price:numeric, qty:int, image?:string|null}> $cart
+     * @param  array<int, array{id:int, name:string, price:numeric, qty:int, image?:string|null}>  $cart
      */
     private function formatTelegramReceiptCaption(Sale $sale, array $cart, string $cashierName, int $itemsCount): string
     {
@@ -170,46 +187,46 @@ class PosController extends Controller
         $maxItems = 6;
         $visibleItemLines = array_slice($itemLines, 0, $maxItems);
         if (count($itemLines) > $maxItems) {
-            $visibleItemLines[] = '• +' . (count($itemLines) - $maxItems) . ' more items';
+            $visibleItemLines[] = '• +'.(count($itemLines) - $maxItems).' more items';
         }
 
         $discountPrefix = $discount > 0 ? '-' : '';
 
         $lines = array_merge([
             '<b>🧾 NexPOS Receipt</b>',
-            '<b>Invoice:</b> <code>' . $escape($sale->invoice_number) . '</code>',
-            '<b>Date:</b> ' . $escape($sale->created_at->format('Y-m-d H:i')),
-            '<b>Cashier:</b> ' . $escape($cashierName),
-            '<b>Items:</b> ' . $itemsCount,
+            '<b>Invoice:</b> <code>'.$escape($sale->invoice_number).'</code>',
+            '<b>Date:</b> '.$escape($sale->created_at->format('Y-m-d H:i')),
+            '<b>Cashier:</b> '.$escape($cashierName),
+            '<b>Items:</b> '.$itemsCount,
             '',
             '<b>Items</b>',
         ], $visibleItemLines, [
             '',
             '<b>Totals</b>',
-            'Subtotal: $' . number_format((float) $subtotal, 2),
-            'Discount: ' . $discountPrefix . '$' . number_format((float) $discount, 2),
-            'Tax: $' . number_format((float) $tax, 2),
-            '<b>Total:</b> $' . number_format((float) $sale->final_total, 2),
-            '<b>Paid via:</b> ' . $escape($paymentLabel),
+            'Subtotal: $'.number_format((float) $subtotal, 2),
+            'Discount: '.$discountPrefix.'$'.number_format((float) $discount, 2),
+            'Tax: $'.number_format((float) $tax, 2),
+            '<b>Total:</b> $'.number_format((float) $sale->final_total, 2),
+            '<b>Paid via:</b> '.$escape($paymentLabel),
         ]);
 
         return implode("\n", $lines);
     }
 
     /**
-     * @param array<int, array{id:int, name:string, price:numeric, qty:int, image?:string|null}> $cart
+     * @param  array<int, array{id:int, name:string, price:numeric, qty:int, image?:string|null}>  $cart
      * @return array{filename:string, contents:string}
      */
     private function resolveTelegramReceiptPhoto(array $cart): array
     {
         foreach ($cart as $item) {
             $image = $item['image'] ?? null;
-            if (!$image) {
+            if (! $image) {
                 continue;
             }
 
-            $candidate = storage_path('app/public/' . ltrim((string) $image, '/'));
-            if (!is_file($candidate)) {
+            $candidate = storage_path('app/public/'.ltrim((string) $image, '/'));
+            if (! is_file($candidate)) {
                 continue;
             }
 

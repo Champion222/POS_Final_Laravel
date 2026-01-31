@@ -54,7 +54,7 @@
                     </form>
 
                     <a href="{{ route('profile.edit') }}" class="hidden sm:flex items-center gap-3 pl-2 group">
-                        <img src="https://ui-avatars.com/api/?name={{ auth()->user()->name }}&background=random" class="w-10 h-10 rounded-full border-2 border-white/20 group-hover:border-indigo-400 transition-colors">
+                        <img src="{{ auth()->user()->image ? asset('storage/'.auth()->user()->image) : 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&background=random' }}" class="w-10 h-10 rounded-full border-2 border-white/20 group-hover:border-indigo-400 transition-colors object-cover">
                     </a>
                 </div>
             </div>

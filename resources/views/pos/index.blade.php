@@ -26,6 +26,7 @@
                     @forelse($products as $product)
                     <div x-show="matchesSearch('{{ strtolower($product->name) }}', '{{ $product->category_id }}', '{{ $product->barcode }}')"
                          @click.stop.prevent="addToCart({{ $product->id }}, '{{ addslashes($product->name) }}', {{ $product->sale_price }}, '{{ $product->image }}')"
+                         :class="(productStock[{{ $product->id }}] ?? 0) <= 0 ? 'opacity-50 pointer-events-none' : ''"
                          class="group bg-white rounded-[2rem] p-4 border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-indigo-100/50 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col h-full relative select-none overflow-hidden">
                         
                         <div class="h-40 bg-gray-50 rounded-[1.5rem] mb-4 overflow-hidden relative group-hover:bg-indigo-50 transition-colors">
@@ -37,9 +38,9 @@
                                 </div> 
                             @endif
                             
-                            <div class="absolute top-3 left-3 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm backdrop-blur-md border border-white/20
-                                {{ $product->qty <= 5 ? 'bg-red-500/90 text-white' : 'bg-white/90 text-gray-800' }}">
-                                {{ $product->qty }} Left
+                            <div class="absolute top-3 left-3 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm backdrop-blur-md border border-white/20"
+                                 :class="(productStock[{{ $product->id }}] ?? 0) <= 5 ? 'bg-red-500/90 text-white' : 'bg-white/90 text-gray-800'">
+                                <span x-text="(productStock[{{ $product->id }}] ?? {{ $product->qty }}) + ' Left'">{{ $product->qty }} Left</span>
                             </div>
                         </div>
 
@@ -269,6 +270,7 @@
                 search: '', category: 'all', cart: [], mode: 'cart', loading: false, qrCode: '', qrMd5: '', 
                 countdownTimer: null, timeLeft: 180, isPolling: false,
                 cashModalOpen: false, cashReceived: null, cashError: '',
+                productStock: @json($products->pluck('qty', 'id')),
 
                 get totalCents() {
                     return this.cart.reduce((sum, item) => {
@@ -288,9 +290,19 @@
                     const itemId = Number(id);
                     const itemPrice = Number(price);
                     let index = this.cart.findIndex(i => Number(i.id) === itemId);
+                    const available = Number(this.productStock[itemId] ?? 0);
+
+                    if (available <= 0) {
+                        alert('Out of stock.');
+                        return;
+                    }
 
                     if (index !== -1) {
                         const currentQty = Number(this.cart[index].qty || 0);
+                        if (currentQty + 1 > available) {
+                            alert(`Only ${available} left in stock.`);
+                            return;
+                        }
                         this.cart.splice(index, 1, { ...this.cart[index], qty: currentQty + 1 });
                         return;
                     }
@@ -304,6 +316,14 @@
                     }
 
                     let newQty = Number(this.cart[index].qty || 0) + val;
+                    if (val > 0) {
+                        const itemId = Number(this.cart[index].id);
+                        const available = Number(this.productStock[itemId] ?? 0);
+                        if (newQty > available) {
+                            alert(`Only ${available} left in stock.`);
+                            return;
+                        }
+                    }
                     if (newQty <= 0) {
                         this.cart.splice(index, 1);
                         return;
@@ -433,6 +453,34 @@
                     return `${m}:${s}`;
                 },
 
+                applyStockDeduction() {
+                    this.cart.forEach((item) => {
+                        const itemId = Number(item.id);
+                        const current = Number(this.productStock[itemId] ?? 0);
+                        const qty = Number(item.qty || 0);
+                        this.productStock[itemId] = Math.max(0, current - qty);
+                    });
+                },
+
+                async refreshStock() {
+                    try {
+                        const response = await fetch('{{ route("pos.products.stock") }}', {
+                            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                        });
+
+                        if (!response.ok) {
+                            return;
+                        }
+
+                        const data = await response.json();
+                        if (data.status === 'success' && data.stocks) {
+                            this.productStock = { ...this.productStock, ...data.stocks };
+                        }
+                    } catch (error) {
+                        console.warn('Unable to refresh stock.', error);
+                    }
+                },
+
                 saveOrder(type) {
                     fetch('{{ route("pos.store") }}', {
                         method: 'POST',
@@ -446,6 +494,8 @@
                     .then(r => r.json())
                     .then(data => {
                         if (data.status === 'success') {
+                            this.applyStockDeduction();
+                            this.refreshStock();
                             this.mode = 'success'; 
                             setTimeout(() => {
                                 this.cart = []; 

@@ -16,7 +16,7 @@
                         <div class="relative inline-block group/avatar cursor-pointer">
                             <div class="w-32 h-32 rounded-full p-1 bg-white shadow-lg mx-auto overflow-hidden transition-transform duration-300 group-hover/avatar:scale-105">
                                 <img id="preview" 
-                                     src="{{ auth()->user()->avatar ? asset('storage/'.auth()->user()->avatar) : 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&background=random&color=fff' }}" 
+                                     src="{{ auth()->user()->image ? asset('storage/'.auth()->user()->image) : 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&background=random&color=fff' }}" 
                                      class="w-full h-full rounded-full object-cover border-4 border-gray-50">
                             </div>
                             
@@ -24,7 +24,7 @@
                                 <i class="fas fa-camera text-white text-2xl drop-shadow-md"></i>
                             </div>
                             
-                            <input type="file" name="avatar" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" 
+                            <input type="file" name="image" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" 
                                    onchange="document.getElementById('preview').src = window.URL.createObjectURL(this.files[0]); document.getElementById('save-photo-btn').classList.remove('hidden');">
                         </div>
 
