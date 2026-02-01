@@ -42,3 +42,87 @@
     </div>
 </div>
 @endif
+
+@if (session()->has('play_sound_text'))
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        const message = @json(session('play_sound_text'));
+        let played = false;
+
+        const speakMessage = () => {
+            if (!('speechSynthesis' in window)) {
+                return;
+            }
+            const utterance = new SpeechSynthesisUtterance(message);
+            utterance.rate = 0.95;
+            utterance.pitch = 1;
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utterance);
+        };
+
+        const playChimeWithContext = (ctx) => {
+            const oscillator = ctx.createOscillator();
+            const gain = ctx.createGain();
+            oscillator.type = 'sine';
+            oscillator.frequency.value = 880;
+            gain.gain.value = 0.12;
+            oscillator.connect(gain);
+            gain.connect(ctx.destination);
+            oscillator.start();
+            oscillator.stop(ctx.currentTime + 0.18);
+        };
+
+        const playNow = () => {
+            if (played) {
+                return;
+            }
+            played = true;
+
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    const ctx = new AudioContext();
+                    playChimeWithContext(ctx);
+                }
+            } catch (error) {
+                console.warn('Unable to play chime.', error);
+            }
+
+            speakMessage();
+        };
+
+        const tryAutoplay = () => {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) {
+                    playNow();
+                    return;
+                }
+                const ctx = new AudioContext();
+                const start = () => {
+                    if (played) {
+                        return;
+                    }
+                    played = true;
+                    playChimeWithContext(ctx);
+                    speakMessage();
+                };
+
+                if (ctx.state === 'suspended') {
+                    ctx.resume().then(start).catch(() => {
+                        played = false;
+                    });
+                } else {
+                    start();
+                }
+            } catch (error) {
+                console.warn('Unable to autoplay sound.', error);
+            }
+        };
+
+        tryAutoplay();
+
+        document.addEventListener('pointerdown', playNow, { once: true });
+    });
+</script>
+@endif

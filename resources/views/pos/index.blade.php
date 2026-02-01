@@ -10,6 +10,8 @@
                 <div class="flex-1 relative w-full">
                     <i class="fas fa-search absolute left-5 top-4 text-indigo-300 text-lg"></i>
                     <input x-model="search" type="text" placeholder="Search products, barcodes..." 
+                           @input.debounce.150="tryAddBarcode()"
+                           @keydown.enter.prevent="tryAddBarcode()"
                            class="w-full pl-14 pr-6 py-3.5 bg-gray-50 border-transparent rounded-2xl font-bold text-gray-700 focus:bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all placeholder-gray-400">
                 </div>
                 <div class="relative w-full md:w-64">
@@ -77,7 +79,7 @@
                         <h2 class="font-black text-xl text-gray-900 tracking-tight">Current Order</h2>
                         <p class="text-xs text-gray-400 font-medium mt-0.5" x-text="cart.length + ' items added'"></p>
                     </div>
-                    <button @click="clearCart()" x-show="cart.length > 0" class="text-xs font-bold text-red-500 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-xl transition flex items-center gap-2">
+                    <button @click="openClearModal()" x-show="cart.length > 0" class="text-xs font-bold text-red-500 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-xl transition flex items-center gap-2">
                         <i class="fas fa-trash-alt"></i> Clear
                     </button>
                 </div>
@@ -204,6 +206,30 @@
             </div>
         </div>
 
+        <div x-show="clearModalOpen" x-cloak class="fixed inset-0 z-[80] flex items-center justify-center p-4" @keydown.escape.window="closeClearModal()">
+            <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" @click="closeClearModal()"></div>
+            <div class="relative w-full max-w-md bg-white rounded-[2rem] p-6 shadow-2xl border border-gray-100" @click.stop>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-lg font-black text-gray-900 tracking-tight">Clear Cart?</h2>
+                        <p class="text-xs text-gray-400 font-bold uppercase tracking-wider mt-1">This will remove all items.</p>
+                    </div>
+                    <button type="button" @click="closeClearModal()" class="w-9 h-9 rounded-full bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="mt-6 grid grid-cols-2 gap-4">
+                    <button type="button" @click="closeClearModal()" class="py-3 rounded-2xl bg-gray-100 text-gray-700 font-black text-sm hover:bg-gray-200 transition">
+                        Cancel
+                    </button>
+                    <button type="button" @click="confirmClearCart()" class="py-3 rounded-2xl bg-red-600 text-white font-black text-sm hover:bg-red-700 transition">
+                        Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <div x-show="cashModalOpen" x-cloak class="fixed inset-0 z-[80] flex items-center justify-center p-4" @keydown.escape.window="closeCashModal()">
             <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" @click="closeCashModal()"></div>
             <div class="relative w-full max-w-xl bg-white rounded-[2rem] p-6 shadow-2xl border border-gray-100" @click.stop>
@@ -269,8 +295,10 @@
             return {
                 search: '', category: 'all', cart: [], mode: 'cart', loading: false, qrCode: '', qrMd5: '', 
                 countdownTimer: null, timeLeft: 180, isPolling: false,
+                clearModalOpen: false,
                 cashModalOpen: false, cashReceived: null, cashError: '',
                 productStock: @json($products->pluck('qty', 'id')),
+                barcodeIndex: @json($barcodeIndex),
 
                 get totalCents() {
                     return this.cart.reduce((sum, item) => {
@@ -285,6 +313,20 @@
                 matchesSearch(name, cat, code) {
                     const s = this.search.toLowerCase();
                     return (name.includes(s) || (code && code.includes(s))) && (this.category === 'all' || this.category == cat);
+                },
+                tryAddBarcode() {
+                    const code = this.search.trim().toLowerCase();
+                    if (!code) {
+                        return;
+                    }
+
+                    const product = this.barcodeIndex[code];
+                    if (!product) {
+                        return;
+                    }
+
+                    this.addToCart(product.id, product.name, product.price, product.image);
+                    this.search = '';
                 },
                 addToCart(id, name, price, image) {
                     const itemId = Number(id);
@@ -331,7 +373,19 @@
 
                     this.cart.splice(index, 1, { ...this.cart[index], qty: newQty });
                 },
-                clearCart() { if(confirm('Clear cart?')) this.cart = []; },
+                openClearModal() {
+                    if (this.cart.length === 0) {
+                        return;
+                    }
+                    this.clearModalOpen = true;
+                },
+                closeClearModal() {
+                    this.clearModalOpen = false;
+                },
+                confirmClearCart() {
+                    this.cart = [];
+                    this.clearModalOpen = false;
+                },
                 
                 processPayment(type) {
                     if (type === 'cash') {
@@ -453,6 +507,43 @@
                     return `${m}:${s}`;
                 },
 
+                playChime() {
+                    try {
+                        const AudioContext = window.AudioContext || window.webkitAudioContext;
+                        if (!AudioContext) {
+                            return;
+                        }
+                        const ctx = new AudioContext();
+                        const oscillator = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        oscillator.type = 'sine';
+                        oscillator.frequency.value = 740;
+                        gain.gain.value = 0.12;
+                        oscillator.connect(gain);
+                        gain.connect(ctx.destination);
+                        oscillator.start();
+                        oscillator.stop(ctx.currentTime + 0.18);
+                    } catch (error) {
+                        console.warn('Unable to play chime.', error);
+                    }
+                },
+
+                speakMessage(message) {
+                    if (!('speechSynthesis' in window)) {
+                        return;
+                    }
+                    const utterance = new SpeechSynthesisUtterance(message);
+                    utterance.rate = 0.95;
+                    utterance.pitch = 1;
+                    window.speechSynthesis.cancel();
+                    window.speechSynthesis.speak(utterance);
+                },
+
+                playThankYouSound() {
+                    this.playChime();
+                    this.speakMessage('Thank you');
+                },
+
                 applyStockDeduction() {
                     this.cart.forEach((item) => {
                         const itemId = Number(item.id);
@@ -494,6 +585,7 @@
                     .then(r => r.json())
                     .then(data => {
                         if (data.status === 'success') {
+                            this.playThankYouSound();
                             this.applyStockDeduction();
                             this.refreshStock();
                             this.mode = 'success'; 

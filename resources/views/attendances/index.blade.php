@@ -55,19 +55,64 @@
             </div>
         </div>
 
+        <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div class="flex flex-wrap items-center gap-2">
+                <a href="{{ route('attendance.index', ['range' => 'today', 'sort' => $sort]) }}"
+                   class="px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-widest transition-all border {{ $range === 'today' ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-200' : 'bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200' }}">
+                    Today
+                </a>
+                <a href="{{ route('attendance.index', ['range' => 'week', 'sort' => $sort]) }}"
+                   class="px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-widest transition-all border {{ $range === 'week' ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-200' : 'bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200' }}">
+                    This Week
+                </a>
+                <a href="{{ route('attendance.index', ['range' => 'month', 'sort' => $sort]) }}"
+                   class="px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-widest transition-all border {{ $range === 'month' ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-200' : 'bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200' }}">
+                    This Month
+                </a>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                    Showing: <span class="text-gray-800">{{ $rangeLabel }}</span>
+                </div>
+                <form action="{{ route('attendance.index') }}" method="GET" class="relative">
+                    <input type="hidden" name="range" value="{{ $range }}">
+                    <select name="sort" onchange="this.form.submit()"
+                            class="pl-4 pr-10 py-2 rounded-2xl bg-gray-50 border border-gray-200 text-xs font-bold text-gray-600 focus:bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition appearance-none">
+                        <option value="latest" @selected($sort === 'latest')>Latest First</option>
+                        <option value="earliest" @selected($sort === 'earliest')>Earliest First</option>
+                    </select>
+                    <i class="fas fa-chevron-down absolute right-4 top-3 text-[10px] text-gray-400 pointer-events-none"></i>
+                </form>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+                <a href="{{ route('attendance.export', ['range' => 'today']) }}"
+                   class="px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-widest bg-emerald-600 text-white shadow-lg shadow-emerald-200 hover:bg-emerald-700 transition">
+                    Export Today
+                </a>
+                <a href="{{ route('attendance.export', ['range' => 'week']) }}"
+                   class="px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-widest bg-emerald-600 text-white shadow-lg shadow-emerald-200 hover:bg-emerald-700 transition">
+                    Export Week
+                </a>
+                <a href="{{ route('attendance.export', ['range' => 'month']) }}"
+                   class="px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-widest bg-emerald-600 text-white shadow-lg shadow-emerald-200 hover:bg-emerald-700 transition">
+                    Export Month
+                </a>
+            </div>
+        </div>
+
         <div class="flex flex-col lg:flex-row gap-8 items-start">
             
             <div class="w-full lg:w-2/3 bg-white rounded-3xl shadow-xl shadow-gray-100/50 border border-gray-100 overflow-hidden">
                 <div class="px-8 py-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/30">
                     <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
-                        <i class="fas fa-list-ul text-indigo-500"></i> Daily Activity Log
+                        <i class="fas fa-list-ul text-indigo-500"></i> Attendance Log
+                        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">{{ $rangeLabel }}</span>
                     </h3>
                     <div class="flex gap-2 items-center bg-white border border-gray-200 px-3 py-1.5 rounded-full shadow-sm">
-                        <span class="flex h-2 w-2 relative">
-                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                        </span>
-                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Live Feed</span>
+                        <i class="fas fa-calendar-day text-[10px] text-indigo-500"></i>
+                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">{{ $rangeDescription }}</span>
                     </div>
                 </div>
                 

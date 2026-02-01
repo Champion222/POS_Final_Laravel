@@ -25,8 +25,19 @@ class PosController extends Controller
         $products = Product::select('id', 'name', 'sale_price', 'image', 'qty', 'barcode', 'category_id')->where('qty', '>', 0)->get();
         $categories = Category::select('id', 'name')->get();
         $customers = Customer::select('id', 'name')->get();
+        $barcodeIndex = $products
+            ->filter(fn (Product $product) => filled($product->barcode))
+            ->mapWithKeys(fn (Product $product) => [
+                strtolower((string) $product->barcode) => [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'price' => $product->sale_price,
+                    'image' => $product->image,
+                ],
+            ])
+            ->all();
 
-        return view('pos.index', compact('products', 'categories', 'customers'));
+        return view('pos.index', compact('products', 'categories', 'customers', 'barcodeIndex'));
     }
 
     public function stock(): JsonResponse
@@ -48,12 +59,14 @@ class PosController extends Controller
             return response()->json(['status' => 'error']);
         }
 
-        $info = new IndividualInfo(
+        $info = IndividualInfo::withOptionalArray(
             config('services.bakong.merchant_id', 'khqr@devb'),
             config('services.bakong.merchant_name', 'NexPOS Store'),
             config('services.bakong.city', 'Phnom Penh'),
-            KHQRData::CURRENCY_USD,
-            $amount
+            [
+                'currency' => KHQRData::CURRENCY_USD,
+                'amount' => $amount,
+            ]
         );
 
         $khqr = BakongKHQR::generateIndividual($info);
@@ -62,6 +75,7 @@ class PosController extends Controller
         return response()->json([
             'status' => 'success',
             'qr_svg' => trim($qrImage),
+            'qr_string' => $khqr->data['qr'],
             'md5' => $khqr->data['md5'],
             'amount' => number_format($amount, 2),
         ]);

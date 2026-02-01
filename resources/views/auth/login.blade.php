@@ -34,13 +34,15 @@
             <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-500 rounded-full mix-blend-overlay filter blur-[80px] opacity-20 transform translate-x-1/2 -translate-y-1/2"></div>
             <div class="absolute bottom-0 left-0 w-64 h-64 bg-purple-500 rounded-full mix-blend-overlay filter blur-[80px] opacity-20 transform -translate-x-1/2 translate-y-1/2"></div>
 
-            <div class="relative z-10 flex items-center gap-4">
-                <div class="w-12 h-12 rounded-2xl bg-transparent border border-white/10 flex items-center justify-center shadow-lg shadow-indigo-500/30 overflow-hidden">
-                    <img src="{{ $brandLogo }}" alt="NEXPOX logo" class="w-full h-full object-contain drop-shadow">
-                </div>
-                <div>
-                    <h1 class="text-2xl font-black tracking-tight leading-none">NEXPOX</h1>
-                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.28em] mt-1">Mart</p>
+                <div class="relative z-10 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 via-blue-500 to-purple-600 p-[2px] shadow-lg shadow-indigo-500/30">
+                        <div class="h-full w-full rounded-full bg-[#0b1120] flex items-center justify-center overflow-hidden ring-1 ring-white/10">
+                            <img src="{{ $brandLogo }}" alt="NEXPOX logo" class="w-full h-full rounded-full object-cover drop-shadow">
+                        </div>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-black tracking-tight leading-none">NEXPOX</h1>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.28em] mt-1">Mart</p>
                 </div>
             </div>
 
@@ -60,8 +62,10 @@
             <div class="w-full max-w-sm space-y-8">
                 
                 <div class="lg:hidden flex justify-center mb-6">
-                    <div class="w-12 h-12 rounded-xl bg-transparent border border-indigo-200 flex items-center justify-center text-white text-xl shadow-lg">
-                        <img src="{{ $brandLogo }}" alt="NEXPOX logo" class="h-full w-full object-contain">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 via-blue-500 to-purple-600 p-[2px] shadow-lg shadow-indigo-200">
+                        <div class="h-full w-full rounded-full bg-white flex items-center justify-center overflow-hidden ring-1 ring-indigo-100">
+                            <img src="{{ $brandLogo }}" alt="NEXPOX logo" class="h-full w-full rounded-full object-cover">
+                        </div>
                     </div>
                 </div>
 

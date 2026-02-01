@@ -36,8 +36,10 @@
                 @php($brandLogo = 'https://i.postimg.cc/FHMsN52t/NEXPOS-Mart.png')
                 <div class="relative z-10">
                     <div class="flex items-center gap-3">
-                        <div class="bg-transparent border border-white/20 h-12 w-12 rounded-2xl flex items-center justify-center">
-                            <img src="{{ $brandLogo }}" alt="NEXPOX logo" class="h-full w-full object-contain drop-shadow">
+                        <div class="h-12 w-12 rounded-full bg-gradient-to-br from-indigo-500 via-blue-500 to-purple-600 p-[2px] shadow-lg shadow-indigo-500/30">
+                            <div class="h-full w-full rounded-full bg-slate-900 flex items-center justify-center overflow-hidden ring-1 ring-white/10">
+                                <img src="{{ $brandLogo }}" alt="NEXPOX logo" class="h-full w-full rounded-full object-cover drop-shadow">
+                            </div>
                         </div>
                         <div>
                             <span class="text-2xl font-black tracking-tight">NEXPOX</span>
@@ -81,8 +83,10 @@
                     
                     <div class="lg:hidden text-center mb-8">
                         <div class="inline-flex items-center gap-2 justify-center">
-                            <div class="bg-transparent border border-indigo-200 rounded-xl h-11 w-11 flex items-center justify-center">
-                                <img src="{{ $brandLogo }}" alt="NEXPOX logo" class="h-full w-full object-contain">
+                            <div class="h-11 w-11 rounded-full bg-gradient-to-br from-indigo-500 via-blue-500 to-purple-600 p-[2px] shadow-lg shadow-indigo-200">
+                                <div class="h-full w-full rounded-full bg-white flex items-center justify-center overflow-hidden ring-1 ring-indigo-100">
+                                    <img src="{{ $brandLogo }}" alt="NEXPOX logo" class="h-full w-full rounded-full object-cover">
+                                </div>
                             </div>
                             <span class="text-2xl font-black text-slate-900 tracking-tight">NEXPOX</span>
                         </div>

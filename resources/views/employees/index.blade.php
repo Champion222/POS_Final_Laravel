@@ -77,8 +77,12 @@
                             <td class="px-8 py-5">
                                 <div class="flex items-center gap-4">
                                     <div class="relative">
-                                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-600 font-bold text-lg shadow-inner group-hover:from-indigo-100 group-hover:to-blue-100 group-hover:text-indigo-600 transition-all duration-300">
-                                            {{ substr($emp->name, 0, 1) }}
+                                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-600 font-bold text-lg shadow-inner group-hover:from-indigo-100 group-hover:to-blue-100 group-hover:text-indigo-600 transition-all duration-300 overflow-hidden">
+                                            @if($emp->user && $emp->user->image)
+                                                <img src="{{ asset('storage/'.$emp->user->image) }}" alt="{{ $emp->name }}" class="w-full h-full object-cover">
+                                            @else
+                                                {{ substr($emp->name, 0, 1) }}
+                                            @endif
                                         </div>
                                         @if($emp->user_id)
                                             <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full" title="Active User"></div>
@@ -136,16 +140,20 @@
                                 @endif
                             </td>
                             <td class="px-8 py-5 text-right">
-                                <div class="flex justify-end items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                    <a href="{{ route('employees.show', $emp->id) }}" 
-                                       class="h-9 w-9 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-400 hover:text-indigo-600 hover:border-indigo-200 hover:shadow-sm transition-all" 
+                                <div class="flex justify-end items-center gap-2">
+                                    <a href="{{ route('employees.show', $emp->id) }}"
+                                       class="h-9 w-9 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-400 hover:text-indigo-600 hover:border-indigo-200 hover:shadow-sm transition-all"
                                        title="View Details">
                                         <i class="fas fa-eye text-xs"></i>
                                     </a>
-                                    
+                                    <a href="{{ route('employees.edit', $emp->id) }}"
+                                       class="h-9 w-9 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-400 hover:text-emerald-600 hover:border-emerald-200 hover:shadow-sm transition-all"
+                                       title="Edit Employee">
+                                        <i class="fas fa-pen text-xs"></i>
+                                    </a>
                                     <form action="{{ route('employees.destroy', $emp->id) }}" method="POST" onsubmit="return confirm('Permanently remove {{ $emp->name }}?');">
                                         @csrf @method('DELETE')
-                                        <button class="h-9 w-9 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-400 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-all" 
+                                        <button class="h-9 w-9 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-400 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-all"
                                                 title="Remove Employee">
                                             <i class="fas fa-trash-alt text-xs"></i>
                                         </button>

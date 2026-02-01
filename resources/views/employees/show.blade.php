@@ -10,8 +10,14 @@
                 
                 <div class="flex items-center gap-6">
                     <div class="h-24 w-24 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 p-1 shadow-lg">
-                        <div class="h-full w-full rounded-full bg-white flex items-center justify-center text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-indigo-600 to-purple-600">
-                            {{ substr($employee->name, 0, 1) }}
+                        <div class="h-full w-full rounded-full bg-white overflow-hidden flex items-center justify-center">
+                            @if($employee->user && $employee->user->image)
+                                <img src="{{ asset('storage/'.$employee->user->image) }}" alt="{{ $employee->name }}" class="h-full w-full object-cover">
+                            @else
+                                <div class="h-full w-full flex items-center justify-center text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-indigo-600 to-purple-600">
+                                    {{ substr($employee->name, 0, 1) }}
+                                </div>
+                            @endif
                         </div>
                     </div>
                     <div>

@@ -42,8 +42,10 @@
             <div class="h-24 flex items-center px-8 border-b border-gray-800/50">
                 @php($brandLogo = 'https://i.postimg.cc/FHMsN52t/NEXPOS-Mart.png')
                 <div class="flex items-center gap-4">
-                    <div class="relative w-12 h-12 rounded-2xl bg-transparent flex items-center justify-center overflow-hidden">
-                        <img src="{{ $brandLogo }}" alt="NEXPOX logo" class="w-full h-full object-contain">
+                    <div class="relative w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 via-blue-500 to-purple-600 p-[2px] shadow-lg shadow-indigo-500/30">
+                        <div class="h-full w-full rounded-full bg-[#0f172a] flex items-center justify-center overflow-hidden ring-1 ring-white/10">
+                            <img src="{{ $brandLogo }}" alt="NEXPOX logo" class="w-full h-full rounded-full object-cover">
+                        </div>
                     </div>
                     <div>
                         <h1 class="text-2xl font-black tracking-tight text-white leading-none">NEXPOX</h1>
@@ -120,8 +122,8 @@
                         </div>
                     </a>
                     
-                    <button @click="logoutModal = true" class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-red-500/20 hover:text-red-500 transition-all" title="Sign Out">
-                        <i class="fas fa-power-off"></i>
+                    <button @click="logoutModal = true" class="w-9 h-9 flex items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all" title="Sign Out">
+                        <i class="fas fa-right-from-bracket text-sm"></i>
                     </button>
                 </div>
             </div>

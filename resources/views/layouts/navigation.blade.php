@@ -9,8 +9,10 @@
             @php($brandLogo = 'https://i.postimg.cc/FHMsN52t/NEXPOS-Mart.png')
             <div class="flex items-center gap-8">
                 <a href="{{ route('dashboard') }}" class="flex items-center gap-3 group">
-                    <div class="relative w-12 h-12 rounded-2xl bg-transparent flex items-center justify-center overflow-hidden group-hover:scale-110 transition-transform duration-300">
-                        <img src="{{ $brandLogo }}" alt="NEXPOX logo" class="w-full h-full object-contain">
+                    <div class="relative w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 via-blue-500 to-purple-600 p-[2px] shadow-lg shadow-indigo-200 group-hover:scale-110 transition-transform duration-300">
+                        <div class="h-full w-full rounded-full bg-white flex items-center justify-center overflow-hidden ring-1 ring-indigo-100">
+                            <img src="{{ $brandLogo }}" alt="NEXPOX logo" class="w-full h-full rounded-full object-cover">
+                        </div>
                     </div>
                     <div>
                         <span class="block text-lg font-black text-gray-900 leading-none tracking-tight group-hover:text-indigo-600 transition-colors">NEXPOX</span>
@@ -80,7 +82,10 @@
                         </a>
                         
                         <button @click="logoutModal = true; dropdown = false" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 transition text-left">
-                            <i class="fas fa-sign-out-alt w-5 text-center"></i> Log Out
+                            <span class="w-8 h-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center">
+                                <i class="fas fa-right-from-bracket text-sm"></i>
+                            </span>
+                            Log Out
                         </button>
                     </div>
                 </div>
@@ -127,7 +132,10 @@
                 </x-responsive-nav-link>
 
                 <button @click="logoutModal = true" class="w-full text-left flex items-center gap-2 px-4 py-2 text-base font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition">
-                    <i class="fas fa-sign-out-alt"></i> {{ __('Log Out') }}
+                    <span class="w-8 h-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center">
+                        <i class="fas fa-right-from-bracket text-sm"></i>
+                    </span>
+                    {{ __('Log Out') }}
                 </button>
             </div>
         </div>
@@ -160,7 +168,7 @@
                     <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                         <div class="sm:flex sm:items-start">
                             <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-50 sm:mx-0 sm:h-10 sm:w-10">
-                                <i class="fas fa-sign-out-alt text-red-500 text-lg"></i>
+                                <i class="fas fa-right-from-bracket text-red-500 text-lg"></i>
                             </div>
                             <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
                                 <h3 class="text-base font-bold leading-6 text-gray-900" id="modal-title">Ready to Leave?</h3>

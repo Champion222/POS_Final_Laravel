@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreEmployeeRequest;
+use App\Http\Requests\UpdateEmployeeRequest;
 use App\Models\Employee;
 use App\Models\Position;
 use App\Models\Sale;
@@ -30,6 +31,13 @@ class EmployeeController extends Controller
         $positions = Position::all();
 
         return view('employees.create', compact('positions'));
+    }
+
+    public function edit(Employee $employee): View
+    {
+        $positions = Position::all();
+
+        return view('employees.edit', compact('employee', 'positions'));
     }
 
     // 3. STORE NEW EMPLOYEE
@@ -92,6 +100,96 @@ class EmployeeController extends Controller
             DB::rollBack(); // Undo if error
 
             return back()->withInput()->with('error', 'Error creating employee: '.$e->getMessage());
+        }
+    }
+
+    public function update(UpdateEmployeeRequest $request, Employee $employee): RedirectResponse
+    {
+        $validated = $request->validated();
+        $password = $validated['password'] ?? null;
+        $position = Position::findOrFail($validated['position_id']);
+        $requiresLogin = in_array($position->target_role, ['admin', 'cashier', 'stock_manager'], true);
+        $existingUser = User::where('email', $validated['email'])->first();
+
+        if ($requiresLogin && $existingUser && $existingUser->id !== $employee->user_id) {
+            $alreadyLinked = Employee::where('user_id', $existingUser->id)
+                ->where('id', '!=', $employee->id)
+                ->exists();
+
+            if ($alreadyLinked) {
+                return back()->withInput()->with('error', 'Email is already linked to another employee account.');
+            }
+
+            if ($employee->user_id !== null) {
+                return back()->withInput()->with('error', 'Email is already used by another account.');
+            }
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $userId = $employee->user_id;
+            $currentUser = $employee->user ?? ($employee->user_id ? User::find($employee->user_id) : null);
+
+            if ($requiresLogin) {
+                if ($currentUser) {
+                    $payload = [
+                        'name' => $validated['name'],
+                        'email' => $validated['email'],
+                        'role' => $position->target_role,
+                    ];
+
+                    if (! empty($password)) {
+                        $payload['password'] = Hash::make($password);
+                    }
+
+                    $currentUser->update($payload);
+                    $userId = $currentUser->id;
+                } elseif ($existingUser) {
+                    $payload = [
+                        'name' => $validated['name'],
+                        'role' => $position->target_role,
+                    ];
+
+                    if (! empty($password)) {
+                        $payload['password'] = Hash::make($password);
+                    }
+
+                    $existingUser->update($payload);
+                    $userId = $existingUser->id;
+                } else {
+                    $passwordToSet = $password ?: 'nexpos@123';
+                    $user = User::create([
+                        'name' => $validated['name'],
+                        'email' => $validated['email'],
+                        'password' => Hash::make($passwordToSet),
+                        'role' => $position->target_role,
+                    ]);
+
+                    $userId = $user->id;
+                }
+            } elseif ($employee->user_id) {
+                User::destroy($employee->user_id);
+                $userId = null;
+            }
+
+            $employee->update([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'],
+                'start_date' => $validated['start_date'],
+                'position_id' => $validated['position_id'],
+                'user_id' => $userId,
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('employees.show', $employee)
+                ->with('success', 'Employee updated successfully.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return back()->withInput()->with('error', 'Error updating employee: '.$e->getMessage());
         }
     }
 
