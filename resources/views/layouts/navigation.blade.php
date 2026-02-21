@@ -6,17 +6,17 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-20 items-center">
             
-            @php($brandLogo = 'https://i.postimg.cc/FHMsN52t/NEXPOS-Mart.png')
+            @php($brandLogo = 'https://i.postimg.cc/fTtdBdZf/Chat-GPT-Image-Feb-7-2026-03-27-39-PM.png')
             <div class="flex items-center gap-8">
                 <a href="{{ route('dashboard') }}" class="flex items-center gap-3 group">
                     <div class="relative w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 via-blue-500 to-purple-600 p-[2px] shadow-lg shadow-indigo-200 group-hover:scale-110 transition-transform duration-300">
                         <div class="h-full w-full rounded-full bg-white flex items-center justify-center overflow-hidden ring-1 ring-indigo-100">
-                            <img src="{{ $brandLogo }}" alt="NEXPOX logo" class="w-full h-full rounded-full object-cover">
+                            <img src="{{ $brandLogo }}" alt="GenZPOS logo" class="w-full h-full rounded-full object-cover">
                         </div>
                     </div>
                     <div>
-                        <span class="block text-lg font-black text-gray-900 leading-none tracking-tight group-hover:text-indigo-600 transition-colors">NEXPOX</span>
-                        <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Mart</span>
+                        <span class="block text-lg font-black text-gray-900 leading-none tracking-tight group-hover:text-indigo-600 transition-colors">GenZPOS</span>
+                        <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">MART</span>
                     </div>
                 </a>
 
@@ -31,6 +31,12 @@
                         </x-nav-link>
                     @endif
 
+                    @if(in_array(auth()->user()->role, ['admin', 'cashier', 'stock_manager']))
+                        <x-nav-link :href="route('promotions.index')" :active="request()->routeIs('promotions.*')" icon="fa-percent">
+                            {{ __('Promotions') }}
+                        </x-nav-link>
+                    @endif
+
                     @if(in_array(auth()->user()->role, ['admin', 'stock_manager']))
                         <x-nav-link :href="route('products.index')" :active="request()->routeIs('products.*')" icon="fa-box">
                             {{ __('Inventory') }}
@@ -40,6 +46,12 @@
                     <x-nav-link :href="route('attendance.index')" :active="request()->routeIs('attendance.*')" icon="fa-clock">
                         {{ __('Time Clock') }}
                     </x-nav-link>
+
+                    @if(auth()->user()->role === 'admin')
+                        <x-nav-link :href="route('activities.index')" :active="request()->routeIs('activities.*')" icon="fa-clock-rotate-left">
+                            {{ __('Activity History') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -58,8 +70,13 @@
                             <p class="text-sm font-bold text-gray-800 leading-none group-hover:text-indigo-600 transition">{{ Auth::user()->name }}</p>
                             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">{{ ucfirst(Auth::user()->role) }}</p>
                         </div>
-                        <img src="{{ auth()->user()->image ? asset('storage/'.auth()->user()->image) : 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&background=6366f1&color=fff' }}" 
-                             class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm group-hover:shadow-md transition">
+                        <div class="relative">
+                            <img src="{{ auth()->user()->image ? asset('storage/'.auth()->user()->image) : 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&background=6366f1&color=fff' }}" 
+                                 class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm group-hover:shadow-md transition">
+                            <span class="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-indigo-500 text-[9px] text-white flex items-center justify-center ring-2 ring-white">
+                                <i class="fas fa-camera"></i>
+                            </span>
+                        </div>
                         <i class="fas fa-chevron-down text-xs text-gray-300 mr-2 group-hover:text-gray-500"></i>
                     </button>
 
@@ -112,9 +129,21 @@
                 </x-responsive-nav-link>
             @endif
 
+            @if(in_array(auth()->user()->role, ['admin', 'cashier', 'stock_manager']))
+                <x-responsive-nav-link :href="route('promotions.index')" :active="request()->routeIs('promotions.*')">
+                    {{ __('Promotions') }}
+                </x-responsive-nav-link>
+            @endif
+
             <x-responsive-nav-link :href="route('attendance.index')" :active="request()->routeIs('attendance.*')">
                 {{ __('Attendance') }}
             </x-responsive-nav-link>
+
+            @if(auth()->user()->role === 'admin')
+                <x-responsive-nav-link :href="route('activities.index')" :active="request()->routeIs('activities.*')">
+                    {{ __('Activity History') }}
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <div class="pt-4 pb-1 border-t border-gray-100 bg-gray-50">
@@ -198,3 +227,5 @@
 </nav>
 
 <div class="h-20"></div>
+
+

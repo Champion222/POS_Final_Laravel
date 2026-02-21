@@ -18,8 +18,8 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-protected $fillable = ['name', 'email', 'password', 'role', 'position_id']; 
-// Note: It is good practice to link User to Position if possible, or just rely on Employee.
+    protected $fillable = ['name', 'email', 'password', 'role', 'position_id'];
+    // Note: It is good practice to link User to Position if possible, or just rely on Employee.
 
     /**
      * The attributes that should be hidden for serialization.
@@ -47,6 +47,11 @@ protected $fillable = ['name', 'email', 'password', 'role', 'position_id'];
     public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class);
+    }
+
+    public function activityLogs(): HasMany
+    {
+        return $this->hasMany(ActivityLog::class);
     }
 
     public function getIsCheckedInAttribute(): bool

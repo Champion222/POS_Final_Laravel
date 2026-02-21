@@ -4,29 +4,32 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
     use HasFactory;
 
-    protected $guarded = []; // Allows mass assignment
-    public function promotions() {
+    protected $guarded = [];
+
+    public function promotions(): BelongsToMany
+    {
         return $this->belongsToMany(Promotion::class, 'product_promotion');
     }
-    // Relationship: A product belongs to a Category
-    public function category()
+
+    public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
-    // Relationship: A product belongs to a Supplier
-    public function supplier()
+    public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
     }
 
-    // Relationship: A product has many Sale Details
-    public function saleDetails()
+    public function saleDetails(): HasMany
     {
         return $this->hasMany(SaleDetail::class);
     }

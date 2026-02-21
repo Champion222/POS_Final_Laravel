@@ -1,40 +1,57 @@
 <x-app-layout>
     @section('header', 'Inventory Management')
 
-    <div class="max-w-7xl mx-auto space-y-8">
+    <div
+        x-data="{
+            deleteModalOpen: false,
+            deleteAction: '',
+            deleteName: '',
+            openDeleteModal(action, name) {
+                this.deleteAction = action;
+                this.deleteName = name;
+                this.deleteModalOpen = true;
+            },
+            closeDeleteModal() {
+                this.deleteModalOpen = false;
+                this.deleteAction = '';
+                this.deleteName = '';
+            }
+        }"
+        class="max-w-7xl mx-auto space-y-8"
+    >
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-xl shadow-gray-100/50 flex items-center gap-5 transition-transform hover:scale-[1.02] duration-300">
-                <div class="h-16 w-16 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 text-3xl shadow-sm">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white rounded-3xl p-4 lg:p-5 border border-gray-100 shadow-xl shadow-gray-100/50 flex items-center gap-3 lg:gap-4 min-h-[132px] transition-transform hover:scale-[1.02] duration-300">
+                <div class="h-12 w-12 lg:h-14 lg:w-14 rounded-xl lg:rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 text-xl lg:text-2xl shadow-sm">
                     <i class="fas fa-boxes-stacked"></i>
                 </div>
                 <div>
                     <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total SKU Count</p>
-                    <h3 class="text-3xl font-black text-gray-900">{{ $totalProducts }} <span class="text-lg font-medium text-gray-400">Items</span></h3>
+                    <h3 class="text-2xl lg:text-3xl font-black text-gray-900">{{ $totalProducts }} <span class="text-base lg:text-lg font-medium text-gray-400">Items</span></h3>
                 </div>
             </div>
 
-            <div class="relative overflow-hidden bg-gradient-to-br from-emerald-500 to-teal-600 rounded-[2rem] p-6 text-white shadow-2xl shadow-emerald-200 group">
+            <div class="relative overflow-hidden bg-gradient-to-br from-emerald-500 to-teal-600 rounded-3xl p-4 lg:p-5 min-h-[132px] text-white shadow-2xl shadow-emerald-200 group">
                 <div class="relative z-10">
                     <p class="text-emerald-100 font-bold text-xs uppercase tracking-widest mb-1">Total Inventory Value</p>
-                    <h2 class="text-4xl font-black tracking-tight mt-1">${{ number_format($totalValue, 2) }}</h2>
-                    <div class="mt-3 flex items-center gap-2 text-xs font-medium text-emerald-100 bg-white/10 w-max px-3 py-1 rounded-full backdrop-blur-md">
+                    <h2 class="text-3xl lg:text-[2.1rem] font-black tracking-tight mt-1">${{ number_format($totalValue, 2) }}</h2>
+                    <div class="mt-2.5 flex items-center gap-2 text-xs font-medium text-emerald-100 bg-white/10 w-max px-3 py-1 rounded-full backdrop-blur-md">
                         <i class="fas fa-arrow-trend-up"></i> Potential Revenue
                     </div>
                 </div>
                 <div class="absolute right-0 bottom-0 opacity-10 transform translate-x-4 translate-y-4 group-hover:scale-110 transition duration-500">
-                    <i class="fas fa-sack-dollar text-9xl"></i>
+                    <i class="fas fa-sack-dollar text-7xl lg:text-8xl"></i>
                 </div>
                 <div class="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
             </div>
 
-            <div class="bg-white rounded-[2rem] p-6 border border-red-100 shadow-xl shadow-red-50/50 flex items-center gap-5 relative overflow-hidden group">
-                <div class="h-16 w-16 rounded-2xl bg-red-50 flex items-center justify-center text-red-500 text-3xl shadow-sm group-hover:animate-pulse">
+            <div class="bg-white rounded-3xl p-4 lg:p-5 min-h-[132px] border border-red-100 shadow-xl shadow-red-50/50 flex items-center gap-3 lg:gap-4 relative overflow-hidden group">
+                <div class="h-12 w-12 lg:h-14 lg:w-14 rounded-xl lg:rounded-2xl bg-red-50 flex items-center justify-center text-red-500 text-xl lg:text-2xl shadow-sm group-hover:animate-pulse">
                     <i class="fas fa-bell"></i>
                 </div>
                 <div>
                     <p class="text-xs font-bold text-red-400 uppercase tracking-widest mb-1">Needs Attention</p>
-                    <h3 class="text-3xl font-black text-red-600">{{ $lowStockCount }} <span class="text-lg font-medium text-red-400">Low Stock</span></h3>
+                    <h3 class="text-2xl lg:text-3xl font-black text-red-600">{{ $lowStockCount }} <span class="text-base lg:text-lg font-medium text-red-400">Low Stock</span></h3>
                 </div>
                 <div class="absolute right-0 top-0 w-16 h-16 bg-red-50 rounded-bl-full -mr-8 -mt-8 opacity-50"></div>
             </div>
@@ -124,12 +141,14 @@
                                             <i class="fas fa-pen text-xs"></i>
                                         </a>
                                         
-                                        <form action="{{ route('products.destroy', $product->id) }}" method="POST" onsubmit="return confirm('Delete this product?');">
-                                            @csrf @method('DELETE')
-                                            <button class="h-9 w-9 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-400 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-all" title="Delete">
-                                                <i class="fas fa-trash-alt text-xs"></i>
-                                            </button>
-                                        </form>
+                                        <button
+                                            type="button"
+                                            @click="openDeleteModal(@js(route('products.destroy', $product->id)), @js($product->name))"
+                                            class="h-9 w-9 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-400 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-all"
+                                            title="Delete"
+                                        >
+                                            <i class="fas fa-trash-alt text-xs"></i>
+                                        </button>
                                     </div>
                                 </div>
                             </td>
@@ -157,6 +176,72 @@
                 {{ $products->links() }}
             </div>
             @endif
+        </div>
+
+        <div
+            x-show="deleteModalOpen"
+            x-cloak
+            @keydown.escape.window="closeDeleteModal()"
+            class="relative z-[60]"
+            aria-labelledby="delete-product-title"
+            role="dialog"
+            aria-modal="true"
+        >
+            <div
+                x-show="deleteModalOpen"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity"
+                @click="closeDeleteModal()"
+            ></div>
+
+            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                <div class="flex min-h-full items-center justify-center p-4 text-center">
+                    <div
+                        x-show="deleteModalOpen"
+                        @click.away="closeDeleteModal()"
+                        x-transition:enter="ease-out duration-300"
+                        x-transition:enter-start="opacity-0 scale-95"
+                        x-transition:enter-end="opacity-100 scale-100"
+                        x-transition:leave="ease-in duration-200"
+                        x-transition:leave-start="opacity-100 scale-100"
+                        x-transition:leave-end="opacity-0 scale-95"
+                        class="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left shadow-2xl transition-all"
+                    >
+                        <div class="text-center">
+                            <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-500">
+                                <i class="fas fa-trash-alt text-xl"></i>
+                            </div>
+                            <h3 id="delete-product-title" class="mt-4 text-lg font-bold text-gray-900">Delete product?</h3>
+                            <p class="mt-2 text-sm text-gray-500">
+                                This will permanently remove
+                                <span class="font-semibold text-gray-800" x-text="deleteName || 'this product'"></span>.
+                            </p>
+                        </div>
+
+                        <div class="mt-6 flex gap-3">
+                            <button
+                                type="button"
+                                @click="closeDeleteModal()"
+                                class="w-full rounded-xl bg-gray-100 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-200 transition"
+                            >
+                                Cancel
+                            </button>
+                            <form method="POST" :action="deleteAction" class="w-full">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="w-full rounded-xl bg-red-600 py-2.5 text-sm font-bold text-white shadow-lg shadow-red-200 transition hover:bg-red-700">
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </x-app-layout>

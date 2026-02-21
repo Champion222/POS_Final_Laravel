@@ -5,14 +5,15 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'NEXPOX Mart') }}</title>
+        <title>{{ config('app.name', 'GenZPOS') }}</title>
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
         
         <style>
             body { font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -33,17 +34,17 @@
                 <div class="absolute top-0 right-0 -mr-20 -mt-20 w-[600px] h-[600px] bg-indigo-500 rounded-full mix-blend-multiply filter blur-[100px] opacity-40 animate-pulse"></div>
                 <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-[500px] h-[500px] bg-purple-600 rounded-full mix-blend-multiply filter blur-[100px] opacity-40 animate-pulse" style="animation-delay: 2s"></div>
                 
-                @php($brandLogo = 'https://i.postimg.cc/FHMsN52t/NEXPOS-Mart.png')
+                @php($brandLogo = 'https://i.postimg.cc/fTtdBdZf/Chat-GPT-Image-Feb-7-2026-03-27-39-PM.png')
                 <div class="relative z-10">
                     <div class="flex items-center gap-3">
                         <div class="h-12 w-12 rounded-full bg-gradient-to-br from-indigo-500 via-blue-500 to-purple-600 p-[2px] shadow-lg shadow-indigo-500/30">
                             <div class="h-full w-full rounded-full bg-slate-900 flex items-center justify-center overflow-hidden ring-1 ring-white/10">
-                                <img src="{{ $brandLogo }}" alt="NEXPOX logo" class="h-full w-full rounded-full object-cover drop-shadow">
+                                <img src="{{ $brandLogo }}" alt="GenZPOS logo" class="h-full w-full rounded-full object-cover drop-shadow">
                             </div>
                         </div>
                         <div>
-                            <span class="text-2xl font-black tracking-tight">NEXPOX</span>
-                            <span class="block text-[10px] font-bold text-indigo-200 uppercase tracking-[0.28em]">Mart</span>
+                            <span class="text-2xl font-black tracking-tight">GenZPOS</span>
+                            <span class="block text-[10px] font-bold text-indigo-200 uppercase tracking-[0.28em]">MART</span>
                         </div>
                     </div>
                 </div>
@@ -73,7 +74,7 @@
                 </div>
 
                 <div class="relative z-10 flex justify-between items-center text-xs text-indigo-300 font-medium tracking-wide uppercase">
-                    <span>© {{ date('Y') }} NEXPOX Mart</span>
+                    <span>© {{ date('Y') }} GenZPOS</span>
                     <span>Enterprise V2.0</span>
                 </div>
             </div>
@@ -85,10 +86,10 @@
                         <div class="inline-flex items-center gap-2 justify-center">
                             <div class="h-11 w-11 rounded-full bg-gradient-to-br from-indigo-500 via-blue-500 to-purple-600 p-[2px] shadow-lg shadow-indigo-200">
                                 <div class="h-full w-full rounded-full bg-white flex items-center justify-center overflow-hidden ring-1 ring-indigo-100">
-                                    <img src="{{ $brandLogo }}" alt="NEXPOX logo" class="h-full w-full rounded-full object-cover">
+                                    <img src="{{ $brandLogo }}" alt="GenZPOS logo" class="h-full w-full rounded-full object-cover">
                                 </div>
                             </div>
-                            <span class="text-2xl font-black text-slate-900 tracking-tight">NEXPOX</span>
+                            <span class="text-2xl font-black text-slate-900 tracking-tight">GenZPOS</span>
                         </div>
                     </div>
 
@@ -107,3 +108,5 @@
         </div>
     </body>
 </html>
+
+

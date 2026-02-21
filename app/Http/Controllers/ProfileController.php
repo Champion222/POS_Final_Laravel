@@ -32,7 +32,7 @@ class ProfileController extends Controller
         User::create([
             'name' => $employee->name,
             'email' => $employee->email,
-            'password' => Hash::make('nexpos@123'),
+            'password' => Hash::make('genz@123'),
             'role' => 'cashier',
         ]);
 
@@ -52,7 +52,7 @@ class ProfileController extends Controller
             $user->email_verified_at = null;
         }
 
-        if ($request->filled('password')) {
+        if ($user->role === 'admin' && $request->filled('password')) {
             $user->password = Hash::make($request->input('password'));
         }
 

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -85,7 +85,7 @@
     <div class="header">
         <div class="title">Attendance Report</div>
         <div class="subtitle">
-            {{ $rangeLabel }} • {{ $rangeDescription }}
+            {{ $rangeLabel }} â€¢ {{ $rangeDescription }}
         </div>
     </div>
 
@@ -144,7 +144,8 @@
     </table>
 
     <div class="footer">
-        Generated on {{ now()->format('M d, Y') }} by NEXPOX.
+        Generated on {{ now()->format('M d, Y') }} by GenZPOS.
     </div>
 </body>
 </html>
+

@@ -226,7 +226,7 @@
                         </div>
 
                         <p class="text-xs text-gray-400 font-medium mt-3">
-                            Password updates only apply to roles with system access.
+                            Admin can update passwords for all system-access roles. This action appears in Activity History.
                         </p>
                     </div>
 

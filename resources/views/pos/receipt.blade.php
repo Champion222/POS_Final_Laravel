@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -215,8 +215,8 @@
     <div class="receipt-container">
         
         <div class="brand">
-            <img class="brand-logo" src="https://i.postimg.cc/FHMsN52t/NEXPOS-Mart.png" alt="NEXPOX logo">
-            <h1>NEXPOX</h1>
+            <img class="brand-logo" src="https://i.postimg.cc/fTtdBdZf/Chat-GPT-Image-Feb-7-2026-03-27-39-PM.png" alt="GenZPOS logo">
+            <h1>GenZPOS</h1>
             <p>PHNOM PENH, CAMBODIA</p>
             <p>TEL: +855 12 345 678</p>
         </div>
@@ -235,10 +235,19 @@
 
         <div class="items-list">
             @foreach($sale->details as $item)
+            @php
+                $unitDiscount = $item->discount ?? 0;
+                $unitPrice = max(0, $item->price - $unitDiscount);
+            @endphp
             <div class="item-row">
                 <span class="item-name">{{ $item->product?->name ?? 'Unknown Item' }}</span>
                 <div class="item-calc">
-                    <span>{{ $item->qty }} x ${{ number_format($item->price, 2) }}</span>
+                    <span>
+                        {{ $item->qty }} x ${{ number_format($unitPrice, 2) }}
+                        @if($unitDiscount > 0)
+                            <span style="font-size: 10px; color: #10b981; font-weight: 700;">(Promo)</span>
+                        @endif
+                    </span>
                     <span style="color: #0f172a; font-weight: bold;">${{ number_format($item->subtotal, 2) }}</span>
                 </div>
             </div>
@@ -277,7 +286,7 @@
         <div class="footer">
             <div class="barcode"></div> <p>THANK YOU FOR SHOPPING!</p>
             <p>NO REFUNDS - EXCHANGE ONLY (7 DAYS)</p>
-            <p>www.nexpos-system.com</p>
+            <p>www.GenZPOS-system.com</p>
         </div>
 
     </div>
@@ -302,3 +311,4 @@
 
 </body>
 </html>
+

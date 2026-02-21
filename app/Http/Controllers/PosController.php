@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Customer;
 use App\Models\Product;
+use App\Models\Promotion;
 use App\Models\Sale;
 use App\Models\SaleDetail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -37,7 +39,9 @@ class PosController extends Controller
             ])
             ->all();
 
-        return view('pos.index', compact('products', 'categories', 'customers', 'barcodeIndex'));
+        $promotionIndex = $this->promotionIndex($products);
+
+        return view('pos.index', compact('products', 'categories', 'customers', 'barcodeIndex', 'promotionIndex'));
     }
 
     public function stock(): JsonResponse
@@ -52,6 +56,18 @@ class PosController extends Controller
         ]);
     }
 
+    public function promotions(): JsonResponse
+    {
+        $products = Product::query()
+            ->select('id', 'sale_price')
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'promotions' => $this->promotionIndex($products),
+        ]);
+    }
+
     public function generateKhqr(Request $request): JsonResponse
     {
         $amount = round((float) $request->amount, 2);
@@ -61,7 +77,7 @@ class PosController extends Controller
 
         $info = IndividualInfo::withOptionalArray(
             config('services.bakong.merchant_id', 'khqr@devb'),
-            config('services.bakong.merchant_name', 'NexPOS Store'),
+            config('services.bakong.merchant_name', 'GenZPOS Store'),
             config('services.bakong.city', 'Phnom Penh'),
             [
                 'currency' => KHQRData::CURRENCY_USD,
@@ -105,45 +121,178 @@ class PosController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $cart = $request->cart_data;
+        $cart = $request->input('cart_data', []);
+        $items = collect($cart)
+            ->filter(fn ($item) => is_array($item) && isset($item['id'], $item['qty']))
+            ->map(fn ($item) => [
+                'id' => (int) $item['id'],
+                'qty' => (int) $item['qty'],
+            ])
+            ->filter(fn (array $item) => $item['id'] > 0 && $item['qty'] > 0)
+            ->values();
 
-        DB::beginTransaction();
+        if ($items->isEmpty()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Cart is empty.',
+            ], 422);
+        }
+
         try {
-            $total = 0;
-            foreach ($cart as $item) {
-                $total += $item['price'] * $item['qty'];
-            }
+            [$sale, $receiptItems] = DB::transaction(function () use ($items, $request): array {
+                $productIds = $items->pluck('id')->unique()->values();
+                $products = Product::query()
+                    ->whereIn('id', $productIds)
+                    ->lockForUpdate()
+                    ->get()
+                    ->keyBy('id');
 
-            $sale = Sale::create([
-                'user_id' => Auth::id(),
-                'customer_id' => $request->customer_id,
-                'invoice_number' => 'INV-'.strtoupper(uniqid()),
-                'payment_type' => $request->payment_type,
-                'total_amount' => $total,
-                'final_total' => $total,
-            ]);
+                foreach ($items as $item) {
+                    $product = $products->get($item['id']);
+                    if (! $product) {
+                        throw new \Exception("Product ID {$item['id']} not found.");
+                    }
 
-            foreach ($cart as $item) {
-                SaleDetail::create([
-                    'sale_id' => $sale->id,
-                    'product_id' => $item['id'],
-                    'qty' => $item['qty'],
-                    'price' => $item['price'],
-                    'subtotal' => $item['price'] * $item['qty'],
+                    if ($product->qty < $item['qty']) {
+                        throw new \Exception("Insufficient stock for {$product->name}.");
+                    }
+                }
+
+                $promotionIndex = $this->promotionIndex($products->values());
+
+                $sale = Sale::create([
+                    'user_id' => Auth::id(),
+                    'customer_id' => $request->input('customer_id'),
+                    'invoice_number' => 'INV-'.strtoupper(uniqid()),
+                    'payment_type' => (string) $request->input('payment_type', 'cash'),
+                    'total_amount' => 0,
+                    'discount' => 0,
+                    'tax' => 0,
+                    'final_total' => 0,
                 ]);
-                Product::where('id', $item['id'])->decrement('qty', $item['qty']);
-            }
 
-            DB::commit();
-            $this->sendTelegramReceiptNotification($sale, $cart);
+                $subtotal = 0.0;
+                $discountTotal = 0.0;
+                $receiptItems = [];
+
+                foreach ($items as $item) {
+                    $product = $products->get($item['id']);
+                    $qty = $item['qty'];
+                    $unitPrice = (float) $product->sale_price;
+                    $unitDiscount = (float) ($promotionIndex[$product->id]['discount_amount'] ?? 0);
+                    $unitDiscount = min($unitDiscount, $unitPrice);
+                    $lineSubtotal = round(($unitPrice - $unitDiscount) * $qty, 2);
+
+                    $subtotal += $unitPrice * $qty;
+                    $discountTotal += $unitDiscount * $qty;
+
+                    SaleDetail::create([
+                        'sale_id' => $sale->id,
+                        'product_id' => $product->id,
+                        'qty' => $qty,
+                        'price' => $unitPrice,
+                        'discount' => $unitDiscount,
+                        'subtotal' => $lineSubtotal,
+                    ]);
+
+                    $product->decrement('qty', $qty);
+
+                    $receiptItems[] = [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'price' => max(0, $unitPrice - $unitDiscount),
+                        'qty' => $qty,
+                        'image' => $product->image,
+                    ];
+                }
+
+                $finalTotal = max(0, $subtotal - $discountTotal);
+                $sale->update([
+                    'total_amount' => round($subtotal, 2),
+                    'discount' => round($discountTotal, 2),
+                    'final_total' => round($finalTotal, 2),
+                ]);
+
+                return [$sale, $receiptItems];
+            });
+
+            $this->sendTelegramReceiptNotification($sale, $receiptItems);
 
             return response()->json(['status' => 'success']);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
+        } catch (\Throwable $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 422);
         }
+    }
+
+    /**
+     * @param  Collection<int, Product>  $products
+     * @return array<int, array{id:int, name:string, type:string, value:float, label:string, discount_amount:float, end_date:string|null}>
+     */
+    private function promotionIndex(Collection $products): array
+    {
+        $productsById = $products->keyBy('id');
+        if ($productsById->isEmpty()) {
+            return [];
+        }
+
+        $promotions = Promotion::query()
+            ->active()
+            ->whereHas('products', fn ($query) => $query->whereIn('products.id', $productsById->keys()))
+            ->with(['products' => fn ($query) => $query->select('products.id')->whereIn('products.id', $productsById->keys())])
+            ->get(['id', 'name', 'discount_value', 'type', 'start_date', 'end_date', 'is_active']);
+
+        $index = [];
+        foreach ($promotions as $promotion) {
+            foreach ($promotion->products as $product) {
+                $basePrice = (float) ($productsById[$product->id]->sale_price ?? 0);
+                $discountAmount = $this->promotionDiscount($promotion, $basePrice);
+                if ($discountAmount <= 0) {
+                    continue;
+                }
+
+                $current = $index[$product->id] ?? null;
+                if ($current && $discountAmount <= $current['discount_amount']) {
+                    continue;
+                }
+
+                $index[$product->id] = [
+                    'id' => $promotion->id,
+                    'name' => $promotion->name,
+                    'type' => $promotion->type,
+                    'value' => (float) $promotion->discount_value,
+                    'label' => $this->promotionLabel($promotion),
+                    'discount_amount' => round($discountAmount, 2),
+                    'end_date' => $promotion->end_date?->toDateString(),
+                ];
+            }
+        }
+
+        return $index;
+    }
+
+    private function promotionDiscount(Promotion $promotion, float $price): float
+    {
+        if ($price <= 0) {
+            return 0.0;
+        }
+
+        $discount = $promotion->type === 'percent'
+            ? $price * ((float) $promotion->discount_value / 100)
+            : (float) $promotion->discount_value;
+
+        return min(max($discount, 0), $price);
+    }
+
+    private function promotionLabel(Promotion $promotion): string
+    {
+        $value = (float) $promotion->discount_value;
+        if ($promotion->type === 'percent') {
+            $formatted = rtrim(rtrim(number_format($value, 2), '0'), '.');
+
+            return $formatted.'%';
+        }
+
+        return '$'.number_format($value, 2);
     }
 
     /**
@@ -195,19 +344,19 @@ class PosController extends Controller
             $price = number_format((float) ($item['price'] ?? 0), 2);
             $lineSubtotal = number_format(((float) ($item['price'] ?? 0)) * $qty, 2);
 
-            return "• {$name} x{$qty} @ \${$price} = \${$lineSubtotal}";
+            return "â€¢ {$name} x{$qty} @ \${$price} = \${$lineSubtotal}";
         }, $cart);
 
         $maxItems = 6;
         $visibleItemLines = array_slice($itemLines, 0, $maxItems);
         if (count($itemLines) > $maxItems) {
-            $visibleItemLines[] = '• +'.(count($itemLines) - $maxItems).' more items';
+            $visibleItemLines[] = 'â€¢ +'.(count($itemLines) - $maxItems).' more items';
         }
 
         $discountPrefix = $discount > 0 ? '-' : '';
 
         $lines = array_merge([
-            '<b>🧾 NexPOS Receipt</b>',
+            '<b>ðŸ§¾ GenZPOS Receipt</b>',
             '<b>Invoice:</b> <code>'.$escape($sale->invoice_number).'</code>',
             '<b>Date:</b> '.$escape($sale->created_at->format('Y-m-d H:i')),
             '<b>Cashier:</b> '.$escape($cashierName),

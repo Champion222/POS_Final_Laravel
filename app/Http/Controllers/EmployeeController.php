@@ -71,7 +71,7 @@ class EmployeeController extends Controller
                     $user = User::create([
                         'name' => $validated['name'],
                         'email' => $validated['email'],
-                        'password' => Hash::make('nexpos@123'),
+                        'password' => Hash::make('genz@123'),
                         'role' => $position->target_role,
                     ]);
 
@@ -158,7 +158,7 @@ class EmployeeController extends Controller
                     $existingUser->update($payload);
                     $userId = $existingUser->id;
                 } else {
-                    $passwordToSet = $password ?: 'nexpos@123';
+                    $passwordToSet = $password ?: 'genz@123';
                     $user = User::create([
                         'name' => $validated['name'],
                         'email' => $validated['email'],

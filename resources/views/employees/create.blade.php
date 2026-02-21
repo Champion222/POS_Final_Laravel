@@ -63,7 +63,7 @@
                         <div>
                             <h4 class="font-bold text-gray-800 text-sm">Pro Tip</h4>
                             <p class="text-xs text-gray-500 mt-1">
-                                The default password for new system users is <code class="bg-gray-100 px-1 py-0.5 rounded text-gray-700 font-mono">nexpos@123</code>. Advise them to change it upon first login.
+                                The default password for new system users is <code class="bg-gray-100 px-1 py-0.5 rounded text-gray-700 font-mono">genz@123</code>. Advise them to change it upon first login.
                             </p>
                         </div>
                     </div>

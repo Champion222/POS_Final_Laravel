@@ -38,3 +38,18 @@ test('correct password must be provided to update password', function () {
         ->assertSessionHasErrorsIn('updatePassword', 'current_password')
         ->assertRedirect('/profile');
 });
+
+test('non-admin users cannot update password from account password endpoint', function (string $role) {
+    $user = User::factory()->create(['role' => $role]);
+
+    $this->actingAs($user)
+        ->from('/profile')
+        ->put('/password', [
+            'current_password' => 'password',
+            'password' => 'new-password',
+            'password_confirmation' => 'new-password',
+        ])
+        ->assertForbidden();
+
+    $this->assertTrue(Hash::check('password', $user->refresh()->password));
+})->with(['cashier', 'stock_manager']);

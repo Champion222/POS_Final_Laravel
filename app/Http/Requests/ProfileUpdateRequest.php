@@ -23,6 +23,8 @@ class ProfileUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
+        $canUpdatePassword = $this->user()?->role === 'admin';
+
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => [
@@ -33,7 +35,9 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
-            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'password' => $canUpdatePassword
+                ? ['nullable', 'string', 'min:8', 'confirmed']
+                : ['nullable', 'prohibited'],
             'image' => ['nullable', 'image', 'max:2048'],
         ];
     }
@@ -49,6 +53,7 @@ class ProfileUpdateRequest extends FormRequest
             'image.image' => 'Please upload a valid image file.',
             'image.max' => 'Profile images must be 2MB or smaller.',
             'password.confirmed' => 'The password confirmation does not match.',
+            'password.prohibited' => 'Only admin can update password from profile settings.',
         ];
     }
 }

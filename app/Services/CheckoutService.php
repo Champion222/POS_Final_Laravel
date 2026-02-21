@@ -2,13 +2,13 @@
 
 namespace App\Services;
 
+use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleDetail;
-use App\Models\Product;
 use App\Models\StockTransaction;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 use Exception;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CheckoutService
 {
@@ -16,13 +16,19 @@ class CheckoutService
     {
         return DB::transaction(function () use ($data) {
             $total = 0;
-            $items = json_decode($data['cart_data'], true);
+            $items = $data['cart_data'] ?? [];
+            if (is_string($items)) {
+                $items = json_decode($items, true) ?? [];
+            }
+            if (! is_array($items)) {
+                $items = [];
+            }
 
             // 1. Validate Cart & Stock (Fail Fast)
             foreach ($items as $item) {
                 $product = Product::lockForUpdate()->find($item['id']); // Lock row to prevent race conditions
-                
-                if (!$product) {
+
+                if (! $product) {
                     throw new Exception("Product ID {$item['id']} not found.");
                 }
                 if ($product->qty < $item['qty']) {
@@ -34,7 +40,7 @@ class CheckoutService
             $sale = Sale::create([
                 'user_id' => Auth::id(),
                 'customer_id' => $data['customer_id'] ?? null,
-                'invoice_number' => 'INV-' . strtoupper(uniqid()) . '-' . date('Ymd'),
+                'invoice_number' => 'INV-'.strtoupper(uniqid()).'-'.date('Ymd'),
                 'payment_type' => $data['payment_type'],
                 'total_amount' => 0, // Calculated below
                 'discount' => 0,     // Implement promo logic here if needed
@@ -45,14 +51,10 @@ class CheckoutService
             // 3. Process Items
             foreach ($items as $item) {
                 $product = Product::find($item['id']);
-                
+
                 // Check for Active Promotions
                 $discount = 0;
-                $activePromo = $product->promotions()
-                    ->where('is_active', true)
-                    ->whereDate('start_date', '<=', now())
-                    ->whereDate('end_date', '>=', now())
-                    ->first();
+                $activePromo = $product->promotions()->active()->first();
 
                 if ($activePromo) {
                     if ($activePromo->type == 'percent') {
@@ -62,6 +64,7 @@ class CheckoutService
                     }
                 }
 
+                $discount = min($discount, $product->sale_price);
                 $finalPrice = max(0, $product->sale_price - $discount);
                 $subtotal = $finalPrice * $item['qty'];
                 $total += $subtotal;
@@ -73,7 +76,7 @@ class CheckoutService
                     'qty' => $item['qty'],
                     'price' => $product->sale_price, // Original Price
                     'discount' => $discount,         // Discount Applied
-                    'subtotal' => $subtotal
+                    'subtotal' => $subtotal,
                 ]);
 
                 // 4. Atomic Decrement (MySQL)
@@ -92,7 +95,7 @@ class CheckoutService
             // Update Totals
             $sale->update([
                 'total_amount' => $total,
-                'final_total' => $total // Add Tax logic here if needed
+                'final_total' => $total, // Add Tax logic here if needed
             ]);
 
             return $sale;

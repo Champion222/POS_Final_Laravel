@@ -3,54 +3,54 @@
 
     <div class="max-w-7xl mx-auto space-y-8">
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800 p-8 text-white shadow-2xl shadow-indigo-200 transition-transform hover:scale-[1.02] duration-300">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800 p-4 lg:p-5 min-h-[132px] text-white shadow-2xl shadow-indigo-200 transition-transform hover:scale-[1.02] duration-300">
                 <div class="relative z-10 flex flex-col justify-between h-full">
                     <div>
-                        <div class="flex items-center gap-3 mb-2">
-                            <div class="p-2 bg-white/10 rounded-xl backdrop-blur-sm">
-                                <i class="fas fa-layer-group text-indigo-100"></i>
+                        <div class="flex items-center gap-2.5 mb-1.5">
+                            <div class="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
+                                <i class="fas fa-layer-group text-indigo-100 text-sm"></i>
                             </div>
                             <p class="text-indigo-100 font-bold text-xs uppercase tracking-widest">Total Categories</p>
                         </div>
-                        <h2 class="text-5xl font-black tracking-tight mt-2">{{ $totalCategories }}</h2>
+                        <h2 class="text-4xl lg:text-[2.5rem] font-black tracking-tight mt-1">{{ $totalCategories }}</h2>
                     </div>
-                    <div class="mt-4">
+                    <div class="mt-3">
                         <span class="inline-flex items-center gap-1 text-xs font-medium bg-white/20 px-3 py-1 rounded-full backdrop-blur-md border border-white/10">
                             <i class="fas fa-chart-line"></i> Active Catalog
                         </span>
                     </div>
                 </div>
-                <div class="absolute -right-6 -top-6 h-32 w-32 rounded-full bg-white/10 blur-2xl"></div>
-                <div class="absolute -left-6 -bottom-6 h-40 w-40 rounded-full bg-purple-500/20 blur-3xl"></div>
+                <div class="absolute -right-5 -top-5 h-24 w-24 rounded-full bg-white/10 blur-2xl"></div>
+                <div class="absolute -left-5 -bottom-5 h-28 w-28 rounded-full bg-purple-500/20 blur-3xl"></div>
             </div>
 
-            <div class="relative overflow-hidden rounded-[2rem] bg-white p-8 border border-gray-100 shadow-xl shadow-gray-100/50 group hover:border-indigo-100 transition-all duration-300">
-                <div class="absolute right-0 top-0 h-24 w-24 bg-gradient-to-br from-blue-50 to-transparent rounded-bl-[4rem] opacity-50 group-hover:scale-110 transition-transform"></div>
+            <div class="relative overflow-hidden rounded-3xl bg-white p-4 lg:p-5 min-h-[132px] border border-gray-100 shadow-xl shadow-gray-100/50 group hover:border-indigo-100 transition-all duration-300">
+                <div class="absolute right-0 top-0 h-20 w-20 bg-gradient-to-br from-blue-50 to-transparent rounded-bl-[3rem] opacity-50 group-hover:scale-110 transition-transform"></div>
                 
                 <div class="relative z-10">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-3 bg-blue-50 text-blue-600 rounded-2xl group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
-                            <i class="fas fa-box-open text-xl"></i>
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="p-2.5 bg-blue-50 text-blue-600 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
+                            <i class="fas fa-box-open text-lg"></i>
                         </div>
                         <span class="text-xs font-bold text-gray-300 bg-gray-50 px-2 py-1 rounded-lg">Global</span>
                     </div>
-                    <h2 class="text-4xl font-extrabold text-gray-900">{{ $totalProducts }}</h2>
+                    <h2 class="text-3xl lg:text-4xl font-extrabold text-gray-900">{{ $totalProducts }}</h2>
                     <p class="text-sm text-gray-500 font-medium mt-1">Products Listed</p>
                 </div>
             </div>
 
-            <div class="relative overflow-hidden rounded-[2rem] bg-white p-8 border border-gray-100 shadow-xl shadow-gray-100/50 flex flex-col justify-center items-center text-center group hover:border-emerald-100 transition-all duration-300">
+            <div class="relative overflow-hidden rounded-3xl bg-white p-4 lg:p-5 min-h-[132px] border border-gray-100 shadow-xl shadow-gray-100/50 flex flex-col justify-center items-center text-center group hover:border-emerald-100 transition-all duration-300">
                 <div class="absolute inset-0 bg-gradient-to-br from-emerald-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 
                 <div class="relative z-10">
-                    <div class="relative mx-auto mb-4">
+                    <div class="relative mx-auto mb-3">
                         <div class="absolute inset-0 bg-emerald-400 blur-xl opacity-20 animate-pulse"></div>
-                        <div class="relative h-16 w-16 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg shadow-emerald-200">
+                        <div class="relative h-12 w-12 lg:h-14 lg:w-14 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl lg:rounded-2xl flex items-center justify-center text-white text-lg lg:text-xl shadow-lg shadow-emerald-200">
                             <i class="fas fa-check"></i>
                         </div>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900">System Healthy</h3>
+                    <h3 class="text-base lg:text-lg font-bold text-gray-900">System Healthy</h3>
                     <p class="text-sm text-gray-400 font-medium mt-1">All categories active</p>
                 </div>
             </div>

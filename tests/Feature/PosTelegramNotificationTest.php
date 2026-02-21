@@ -53,7 +53,7 @@ it('sends a telegram notification when a payment is stored', function () {
         return $request->url() === 'https://api.telegram.org/bottest-token/sendPhoto'
             && str_contains($body, 'name="chat_id"')
             && str_contains($body, '123456')
-            && str_contains($body, 'NexPOS Receipt')
+            && str_contains($body, 'GenZPOS Receipt')
             && str_contains($body, 'Cashier:')
             && str_contains($body, 'Alex Cashier')
             && str_contains($body, 'Total:')

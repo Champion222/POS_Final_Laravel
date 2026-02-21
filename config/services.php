@@ -42,7 +42,7 @@ return [
 
     'bakong' => [
         'merchant_id' => env('BAKONG_KHQR_MERCHANT_ID', 'khqr@devb'),
-        'merchant_name' => env('BAKONG_KHQR_MERCHANT_NAME', 'NexPOS Store'),
+        'merchant_name' => env('BAKONG_KHQR_MERCHANT_NAME', 'GenZPOS Store'),
         'city' => env('BAKONG_KHQR_CITY', 'Phnom Penh'),
         'token' => env('BAKONG_TOKEN'),
     ],

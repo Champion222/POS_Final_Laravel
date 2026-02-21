@@ -3,46 +3,46 @@
 
     <div class="max-w-7xl mx-auto space-y-8">
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-gradient-to-br from-violet-600 to-indigo-700 rounded-[2rem] p-8 text-white shadow-2xl shadow-indigo-200 relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-gradient-to-br from-violet-600 to-indigo-700 rounded-3xl p-4 lg:p-5 min-h-[132px] text-white shadow-2xl shadow-indigo-200 relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
                 <div class="relative z-10 flex flex-col justify-between h-full">
                     <div>
                         <p class="text-indigo-100 font-bold text-xs uppercase tracking-widest mb-2">Structure</p>
-                        <h2 class="text-5xl font-black tracking-tight">{{ $totalPositions }}</h2>
-                        <p class="text-indigo-200 text-sm mt-2 font-medium">Defined Department Roles</p>
+                        <h2 class="text-3xl lg:text-[2.4rem] font-black tracking-tight">{{ $totalPositions }}</h2>
+                        <p class="text-indigo-200 text-sm mt-1.5 font-medium">Defined Department Roles</p>
                     </div>
-                    <div class="mt-6 flex items-center gap-2 text-xs font-bold bg-white/10 w-max px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md">
+                    <div class="mt-3 flex items-center gap-2 text-xs font-bold bg-white/10 w-max px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md">
                         <i class="fas fa-check-circle text-emerald-400"></i> System Active
                     </div>
                 </div>
                 <div class="absolute right-0 top-0 opacity-10 transform translate-x-10 -translate-y-10">
-                    <i class="fas fa-sitemap text-9xl"></i>
+                    <i class="fas fa-sitemap text-7xl"></i>
                 </div>
                 <div class="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
             </div>
 
-            <div class="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-xl shadow-gray-100/50 relative overflow-hidden group hover:border-indigo-50 transition-all duration-300">
+            <div class="bg-white rounded-3xl p-4 lg:p-5 min-h-[132px] border border-gray-100 shadow-xl shadow-gray-100/50 relative overflow-hidden group hover:border-indigo-50 transition-all duration-300">
                 <div class="relative z-10">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-3 bg-orange-50 text-orange-500 rounded-2xl group-hover:bg-orange-500 group-hover:text-white transition-colors duration-300">
-                            <i class="fas fa-users text-xl"></i>
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="p-2 bg-orange-50 text-orange-500 rounded-xl lg:rounded-2xl group-hover:bg-orange-500 group-hover:text-white transition-colors duration-300">
+                            <i class="fas fa-users text-base"></i>
                         </div>
                         <span class="bg-gray-50 text-gray-400 text-[10px] font-bold px-2 py-1 rounded-lg uppercase">Global</span>
                     </div>
-                    <h2 class="text-4xl font-extrabold text-gray-900">{{ $totalStaff }}</h2>
+                    <h2 class="text-[2rem] lg:text-4xl font-extrabold text-gray-900">{{ $totalStaff }}</h2>
                     <p class="text-sm text-gray-500 font-medium mt-1">Active Staff Members</p>
                 </div>
             </div>
 
-            <div class="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-xl shadow-gray-100/50 relative overflow-hidden group hover:border-emerald-50 transition-all duration-300">
+            <div class="bg-white rounded-3xl p-4 lg:p-5 min-h-[132px] border border-gray-100 shadow-xl shadow-gray-100/50 relative overflow-hidden group hover:border-emerald-50 transition-all duration-300">
                 <div class="relative z-10">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-3 bg-emerald-50 text-emerald-600 rounded-2xl group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300">
-                            <i class="fas fa-shield-alt text-xl"></i>
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="p-2 bg-emerald-50 text-emerald-600 rounded-xl lg:rounded-2xl group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300">
+                            <i class="fas fa-shield-alt text-base"></i>
                         </div>
                         <span class="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-2 py-1 rounded-lg uppercase">Secured</span>
                     </div>
-                    <h2 class="text-4xl font-extrabold text-gray-900">{{ $systemRoles }}</h2>
+                    <h2 class="text-[2rem] lg:text-4xl font-extrabold text-gray-900">{{ $systemRoles }}</h2>
                     <p class="text-sm text-gray-500 font-medium mt-1">Roles with System Access</p>
                 </div>
             </div>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
@@ -8,6 +9,7 @@ use App\Http\Controllers\PosController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
@@ -86,6 +88,7 @@ Route::middleware(['auth', 'role:admin,cashier,stock_manager'])->group(function 
     Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
     Route::post('/pos/store', [PosController::class, 'store'])->name('pos.store');
     Route::get('/pos/products/stock', [PosController::class, 'stock'])->name('pos.products.stock');
+    Route::get('/pos/products/promotions', [PosController::class, 'promotions'])->name('pos.products.promotions');
 
     // --- RECEIPT VIEW ---
     Route::get('/sales/{sale}/receipt', function (\App\Models\Sale $sale) {
@@ -98,6 +101,14 @@ Route::middleware(['auth', 'role:admin,cashier,stock_manager'])->group(function 
 
     // --- SALES REPORTS (View Only) ---
     Route::get('/reports/sales', [ReportController::class, 'sales'])->name('reports.sales');
+
+    // --- PROMOTIONS (View Only for Cashier) ---
+    Route::resource('promotions', PromotionController::class)->only(['index']);
+});
+
+// 4. PROMOTIONS MANAGEMENT (Admin & Stock Manager)
+Route::middleware(['auth', 'role:admin,stock_manager'])->group(function () {
+    Route::resource('promotions', PromotionController::class)->except(['index', 'show']);
 });
 
 // 5. ADMIN ONLY ROUTES (Restricted High-Level Access)
@@ -107,6 +118,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('positions', PositionController::class);
     Route::resource('employees', EmployeeController::class);
     Route::get('/employees/{employee}/report', [EmployeeController::class, 'report'])->name('employees.report');
+    Route::get('/activities', [ActivityLogController::class, 'index'])->name('activities.index');
 
     // --- ATTENDANCE MANAGEMENT  ---
     Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');

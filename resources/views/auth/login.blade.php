@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login - NEXPOX Mart</title>
+    <title>Login - GenZPOS</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -23,7 +23,7 @@
 </head>
 <body class="h-screen w-full flex items-center justify-center relative overflow-hidden">
 
-    @php($brandLogo = 'https://i.postimg.cc/FHMsN52t/NEXPOS-Mart.png')
+    @php($brandLogo = 'https://i.postimg.cc/fTtdBdZf/Chat-GPT-Image-Feb-7-2026-03-27-39-PM.png')
     <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-indigo-600/20 blur-[120px] animate-pulse"></div>
     <div class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-600/20 blur-[120px] animate-pulse" style="animation-delay: 2s"></div>
 
@@ -37,12 +37,12 @@
                 <div class="relative z-10 flex items-center gap-4">
                     <div class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 via-blue-500 to-purple-600 p-[2px] shadow-lg shadow-indigo-500/30">
                         <div class="h-full w-full rounded-full bg-[#0b1120] flex items-center justify-center overflow-hidden ring-1 ring-white/10">
-                            <img src="{{ $brandLogo }}" alt="NEXPOX logo" class="w-full h-full rounded-full object-cover drop-shadow">
+                            <img src="{{ $brandLogo }}" alt="GenZPOS logo" class="w-full h-full rounded-full object-cover drop-shadow">
                         </div>
                     </div>
                     <div>
-                        <h1 class="text-2xl font-black tracking-tight leading-none">NEXPOX</h1>
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.28em] mt-1">Mart</p>
+                        <h1 class="text-2xl font-black tracking-tight leading-none">GenZPOS</h1>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.28em] mt-1">MART</p>
                 </div>
             </div>
 
@@ -64,7 +64,7 @@
                 <div class="lg:hidden flex justify-center mb-6">
                     <div class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 via-blue-500 to-purple-600 p-[2px] shadow-lg shadow-indigo-200">
                         <div class="h-full w-full rounded-full bg-white flex items-center justify-center overflow-hidden ring-1 ring-indigo-100">
-                            <img src="{{ $brandLogo }}" alt="NEXPOX logo" class="h-full w-full rounded-full object-cover">
+                            <img src="{{ $brandLogo }}" alt="GenZPOS logo" class="h-full w-full rounded-full object-cover">
                         </div>
                     </div>
                 </div>
@@ -74,7 +74,7 @@
                     <p class="text-gray-500 text-sm mt-2 font-medium">Please enter your credentials to access the dashboard.</p>
                 </div>
 
-                <form method="POST" action="{{ route('login') }}" class="space-y-5">
+                <form method="POST" action="{{ route('login', absolute: false) }}" class="space-y-5">
                     @csrf
                     
                     <div class="group">
@@ -125,3 +125,5 @@
 
 </body>
 </html>
+
+

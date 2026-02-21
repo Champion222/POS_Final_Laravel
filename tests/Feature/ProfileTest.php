@@ -14,6 +14,27 @@ test('profile page is displayed', function () {
     $response->assertOk();
 });
 
+test('password fields are hidden for cashier and stock manager profile pages', function (string $role) {
+    $user = User::factory()->create(['role' => $role]);
+
+    $this->actingAs($user)
+        ->get('/profile')
+        ->assertOk()
+        ->assertDontSee('name="password"', false)
+        ->assertDontSee('name="password_confirmation"', false)
+        ->assertSee('Password is managed by administrator.');
+})->with(['cashier', 'stock_manager']);
+
+test('admin profile page shows password fields', function () {
+    $user = User::factory()->create(['role' => 'admin']);
+
+    $this->actingAs($user)
+        ->get('/profile')
+        ->assertOk()
+        ->assertSee('name="password"', false)
+        ->assertSee('name="password_confirmation"', false);
+});
+
 test('profile information can be updated', function () {
     $user = User::factory()->create();
 

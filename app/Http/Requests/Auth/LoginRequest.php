@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -41,7 +43,17 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        $credentials = $this->only('email', 'password');
+
+        if (! Auth::attempt($credentials, $this->boolean('remember'))) {
+            $this->upgradeLegacyDefaultPasswordIfNeeded();
+
+            if (Auth::attempt($credentials, $this->boolean('remember'))) {
+                RateLimiter::clear($this->throttleKey());
+
+                return;
+            }
+
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -50,6 +62,30 @@ class LoginRequest extends FormRequest
         }
 
         RateLimiter::clear($this->throttleKey());
+    }
+
+    private function upgradeLegacyDefaultPasswordIfNeeded(): void
+    {
+        if ($this->input('password') !== 'genz@123') {
+            return;
+        }
+
+        $user = User::query()
+            ->where('email', $this->string('email'))
+            ->whereIn('role', ['cashier', 'stock_manager'])
+            ->first();
+
+        if (! $user) {
+            return;
+        }
+
+        if (! Hash::check('nexpos@123', $user->password)) {
+            return;
+        }
+
+        $user->forceFill([
+            'password' => Hash::make('genz@123'),
+        ])->save();
     }
 
     /**
